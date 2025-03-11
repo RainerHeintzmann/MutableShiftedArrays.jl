@@ -1,10 +1,12 @@
 
 """
-    MutableShiftedArray(parent::AbstractArray, shifts, default)
+    MutableShiftedArray(parent::AbstractArray, shifts, viewsize, default)
 
 Custom `AbstractArray` object to store an `AbstractArray` `parent` shifted by `shifts` steps
 (where `shifts` is a `Tuple` with one `shift` value per dimension of `parent`).
-As opposed to `ShiftedArray`, this object is mutable and mutation operations in the padded ranges are ignored.
+As opposed to `ShiftedArray` of the `ShiftedArrays.jl` toolbox, this object is mutable and mutation operations in the padded ranges are ignored.
+Furthermore it also supports size changes in the view.
+
 For `s::MutableShiftedArray`, `s[i...] == s.parent[map(-, i, s.shifts)...]` if `map(-, i, s.shifts)`
 is a valid index for `s.parent`, and `s.v[i, ...] == default` otherwise.
 Use `copy` to collect the values of a `MutableShiftedArray` into a normal `Array`.
@@ -14,6 +16,12 @@ The recommended constructor is `MutableShiftedArray(parent, shifts; default = mi
     If `parent` is itself a `MutableShiftedArray` with a compatible default value,
     the constructor does not nest `MutableShiftedArray` objects but rather combines
     the shifts additively.
+
+# Arguments
+- `parent::AbstractArray`: the array to be shifted
+- `shifts::Tuple{Int}`: the amount by which `parent` is shifted in each dimension
+- `viewsize::Tuple{Int}`: the size of the view. By default the size of the parent array is used.
+- `default::M`: the default value to return when out of bounds in the original array
 
 # Examples
 
@@ -50,20 +58,21 @@ julia> shifts(s)
 struct MutableShiftedArray{T, M, N, S<:AbstractArray} <: AbstractArray{Union{T, M}, N}
     parent::S
     shifts::NTuple{N, Int}
+    viewsize::NTuple{N, Int}
     default::M
 end
 
 # low-level private constructor to handle type parameters
-function mutableshiftedarray(v::AbstractArray{T, N}, shifts, default::M) where {T, N, M}
-    return MutableShiftedArray{T, M, N, typeof(v)}(v, padded_tuple(v, shifts), default)
+function mutableshiftedarray(v::AbstractArray{T, N}, shifts, viewsize, default::M) where {T, N, M}
+    return MutableShiftedArray{T, M, N, typeof(v)}(v, padded_tuple(v, shifts), padded_tuple(v, viewsize), default)
 end
 
-function MutableShiftedArray(v::AbstractArray, n = (); default = MutableShiftedArrays.default(v))
+function MutableShiftedArray(v::AbstractArray, n = (), viewsize=size(v); default = MutableShiftedArrays.default(v))
     return if (v isa MutableShiftedArray) && default === MutableShiftedArrays.default(v)
         shifts = map(+, MutableShiftedArrays.shifts(v), padded_tuple(v, n))
-        mutableshiftedarray(parent(v), shifts, default)
+        mutableshiftedarray(parent(v), shifts, viewsize, default)
     else
-        mutableshiftedarray(v, n, default)
+        mutableshiftedarray(v, n, viewsize, default)
     end
 end
 
@@ -74,12 +83,12 @@ Shorthand for `MutableShiftedArray{T, 1, S}`.
 """
 const MutableShiftedVector{T, M, S<:AbstractArray} = MutableShiftedArray{T, M, 1, S}
 
-function MutableShiftedVector(v::AbstractVector, n = (); default = MutableShiftedArrays.default(v))
-    return MutableShiftedArray(v, n; default = default)
+function MutableShiftedVector(v::AbstractVector, n = (), viewsize=size(v); default = MutableShiftedArrays.default(v))
+    return MutableShiftedArray(v, n, viewsize; default = default)
 end
 
-size(s::MutableShiftedArray) = size(parent(s))
-axes(s::MutableShiftedArray) = axes(parent(s))
+size(s::MutableShiftedArray) = s.viewsize
+axes(s::MutableShiftedArray) = ntuple((d) -> Base.OneTo(s.viewsize[d]), ndims(s))
 
 # Computing a shifted index (subtracting the offset)
 offset(offsets::NTuple{N,Int}, inds::NTuple{N,Int}) where {N} = map(-, inds, offsets)

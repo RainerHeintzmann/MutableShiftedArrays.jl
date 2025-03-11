@@ -77,7 +77,7 @@ end
                                  0  1         5         9      ])
 end
 
-@testset "MutableShiftedArray mutations" begin
+@testset "mutations" begin
     v = collect(reshape(1:16, 4, 4))  # index assignment to reshaped ranges is not supported
     v = opt_convert(v);
 
@@ -93,6 +93,34 @@ end
     @test sv1[4,4] == 0
     sv1[4,4] = 55
     @test v[1,3] == 55
+    sv1[:,:] .= -1
+    @test v[1,1] == -1
+    @test v[1,4] == 13
+    sv2[:] .= -2
+    @test sv2[4,2] == -2
+end
+
+@testset "mutations & size changes" begin
+    v = collect(reshape(1:16, 4, 4))  # index assignment to reshaped ranges is not supported
+    v = opt_convert(v);
+
+    ns = (6, 3) # one bigger one smaller
+    sv = MutableShiftedArray(v, 2, ns, default = nothing)
+    sv1 = MutableShiftedArray(sv, (1, 1), ns)
+    sv2 = MutableShiftedArray(sv, (1, 1), ns, default = 0)
+    @test size(sv) == ns
+    @test size(sv1) == ns
+    @test size(sv2) == ns
+    # test some mutation operations
+    sv[1,1] = 0
+    @test sv[1,1] == nothing
+    sv[3,3] = 0
+    @test sv[3,3] == 0
+    @test v[1,3] == 0
+    
+    @test_throws BoundsError sv1[4,4] == 0
+    @test_throws BoundsError sv1[4,4] = 55
+    @test v[1,3] == 0
     sv1[:,:] .= -1
     @test v[1,1] == -1
     @test v[1,4] == 13

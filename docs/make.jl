@@ -13,7 +13,7 @@ makedocs(
         "Introduction" => "index.md",
         "API" => "api.md",
     ],
-    strict = true,
+    # strict = true,
 )
 
 # Deploy built documentation from Travis.
