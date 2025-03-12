@@ -1,6 +1,6 @@
 
 """
-    MutableShiftedArray(parent::AbstractArray, shifts, viewsize, default)
+    MutableShiftedArray(parent::AbstractArray, shifts = (), viewsize=size(v); default= MutableShiftedArrays.default(v))
 
 Custom `AbstractArray` object to store an `AbstractArray` `parent` shifted by `shifts` steps
 (where `shifts` is a `Tuple` with one `shift` value per dimension of `parent`).
@@ -19,9 +19,10 @@ The recommended constructor is `MutableShiftedArray(parent, shifts; default = mi
 
 # Arguments
 - `parent::AbstractArray`: the array to be shifted
-- `shifts::Tuple{Int}`: the amount by which `parent` is shifted in each dimension
+- `shifts::Tuple{Int}`: the amount by which `parent` is shifted in each dimension. The default, an empty Tuple will result in no shifts.
 - `viewsize::Tuple{Int}`: the size of the view. By default the size of the parent array is used.
-- `default::M`: the default value to return when out of bounds in the original array
+- `default::M`: the default value to return when out of bounds in the original array. By default zero of the corresponding `eltype` is used.
+                Note that using `missing` as default value will cause single index accesses in CUDA due to the Union type.
 
 # Examples
 
@@ -92,9 +93,13 @@ axes(s::MutableShiftedArray) = ntuple((d) -> Base.OneTo(s.viewsize[d]), ndims(s)
 
 # Computing a shifted index (subtracting the offset)
 offset(offsets::NTuple{N,Int}, inds::NTuple{N,Int}) where {N} = map(-, inds, offsets)
+# offset(offsets::NTuple{N,Int}, inds::Tuple) where {N} = map(.-, inds, offsets)
+# replace_colon(s::MutableShiftedArray, t::Tuple) = ntuple((d)-> (t[d] isa Colon) ? (1:size(s)) : t[d], length(t))
 
+# This getindex function handles the actual indexing. x can be several indices or ranges.
 @inline function getindex(s::MutableShiftedArray{<:Any, <:Any, N}, x::Vararg{Int, N}) where {N}
     @boundscheck checkbounds(s, x...)
+    # v, i = parent(s), offset(shifts(s), replace_colon(s, x))
     v, i = parent(s), offset(shifts(s), x)
     return if checkbounds(Bool, v, i...)
         @inbounds v[i...]
@@ -112,6 +117,25 @@ end
     return s
 end
 
+# function get_src_dst_ranges(src_shifts, src_size, dst_shifts, dst_size)
+#     src_ranges = ntuple((d) -> max(1, -src_shifts[d]):min(dst_size[d], src_size[d] - src_shifts[d]), length(src_size))
+#     dst_ranges = ntuple((d) -> max(1, src_shifts[d] + 1):min(src_size[d], src_size[d]), length(src_size))
+#     return src_ranges, dst_ranges
+# end
+
+# function fill!(s::MutableShiftedArray{<:Any, <:Any, N}, x) where {N}
+#     src_ranges, _ = get_src_dst_ranges(s.shifts, size(s), ntuple((d)->0, ndims(s.parent)), size(s.parent))
+#     fill!((@view s.parent[src_ranges...]), x)
+#     return s    
+# end
+
+# function fill!(sa::SubArray{<:Any, <:Any, <:MutableShiftedArray, <:Any, <:Any}, x) 
+#     src_ranges, _ = get_src_dst_ranges(sa.parent, sa)
+#     @show src_ranges
+#     # fill!((@view A[src_ranges...]), x.default)
+#     return sa
+# end
+
 parent(s::MutableShiftedArray) = s.parent
 
 """
@@ -128,4 +152,4 @@ Return default value.
 """
 default(s::MutableShiftedArray) = s.default
 
-default(::AbstractArray) = missing
+default(a::AbstractArray) = zero(eltype(a))

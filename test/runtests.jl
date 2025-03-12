@@ -1,9 +1,9 @@
 using MutableShiftedArrays, Test
 # using AbstractFFTs 
-use_cuda = false;  # set this to true to test ShiftedArrays for the CuArray datatype
+use_cuda = true;  # set this to true to test ShiftedArrays for the CuArray datatype
 if (use_cuda)
     using CUDA
-    CUDA.allowscalar(true); # needed for some of the comparisons
+    # CUDA.allowscalar(true); # needed for some of the comparisons
 end
 
 function opt_convert(v)
@@ -17,14 +17,14 @@ end
 @testset "MutableShiftedVector" begin
     v = [1, 3, 5, 4]
     v = opt_convert(v);
-    @test all(v .== MutableShiftedVector(v))
-    sv = MutableShiftedVector(v, -1)
-    @test isequal(sv, MutableShiftedVector(v, (-1,)))
+    @test all(v .== MutableShiftedVector(v, default=0))
+    sv = MutableShiftedVector(v, -1, default=0)
+    @test isequal(sv, MutableShiftedVector(v, (-1,), default=0))
     @test length(sv) == 4
-    @test all(sv[1:3] .== [3, 5, 4])
-    @test ismissing(sv[4])
+    @test all(sv[1:3] .== opt_convert([3, 5, 4]))
+    @test sv[4] == 0
     diff = v .- sv
-    @test isequal(diff, [-2, -2, 1, missing])
+    @test isequal(Array(diff), [-2, -2, 1, 4])
     @test shifts(sv) == (-1,)
     svneg = MutableShiftedVector(v, -1, default = -100)
     @test default(svneg) == -100
