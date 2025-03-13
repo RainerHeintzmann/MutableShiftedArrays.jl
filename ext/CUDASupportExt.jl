@@ -26,10 +26,28 @@ function Base.Broadcast.BroadcastStyle(::Type{T})  where {CT, N, CD, T<:SubArray
     CUDA.CuArrayStyle{N,CD}()
 end
 
+# Define the BroadcastStyle for ReshapedArray of MutableShiftedArray with CuArray
+function Base.Broadcast.BroadcastStyle(::Type{T})  where {CT, N, CD, T<:Base.ReshapedArray{<:Any, <:Any, <:MutableShiftedArray{<:Any,<:Any,<:Any,<:CuArray{CT,N,CD}}, <:Any}}
+    CUDA.CuArrayStyle{N,CD}()
+end
+
+# Define the BroadcastStyle for SubArray of a ReshapedArray of MutableShiftedArray with CuArray
+# function Base.Broadcast.BroadcastStyle(::Type{T})  where {MT, T<:MutableShiftedArray{<:Any,<:Any,<:Any,<:MutableShiftedArray{<:Any,<:Any,<:Any,<:MT}}}
+#     Base.Broadcast.BroadcastStyle(MT)
+# end
+
 
 function Base.show(io::IO, mm::MIME"text/plain", cs::MutableShiftedArray) 
     # @show "showing:"
     CUDA.@allowscalar invoke(Base.show, Tuple{IO, typeof(mm), AbstractArray}, io, mm, cs) 
+end
+
+function Base.collect(x::T)  where {CT, N, CD, T<:MutableShiftedArray{<:Any,<:Any,<:Any,<:CuArray{CT,N,CD}}}
+    return copy(x) # stay on the GPU        
+end
+
+function Base.Array(x::T)  where {CT, N, CD, T<:MutableShiftedArray{<:Any,<:Any,<:Any,<:CuArray{CT,N,CD}}}
+    return Array(copy(x)) # stay on the GPU        
 end
 
 end

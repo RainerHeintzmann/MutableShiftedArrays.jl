@@ -91,6 +91,11 @@ end
 size(s::MutableShiftedArray) = s.viewsize
 axes(s::MutableShiftedArray) = ntuple((d) -> Base.OneTo(s.viewsize[d]), ndims(s))
 
+similar(s::MutableShiftedArray, el::Type, v::NTuple{N, Int64}) where {N} = similar(s.parent, el, v)
+# similar(s::MutableShiftedArray, v::Vararg{Union{Integer, NTuple}}) = similar(s.parent, v...)
+# similar(s::MutableShiftedArray, el::Type, v::Vararg{Union{Integer, NTuple}}) = similar(s.parent, el, v...)
+# similar(s::MutableShiftedArray) = similar(s.parent)
+
 # Computing a shifted index (subtracting the offset)
 offset(offsets::NTuple{N,Int}, inds::NTuple{N,Int}) where {N} = map(-, inds, offsets)
 # offset(offsets::NTuple{N,Int}, inds::Tuple) where {N} = map(.-, inds, offsets)
@@ -108,6 +113,7 @@ offset(offsets::NTuple{N,Int}, inds::NTuple{N,Int}) where {N} = map(-, inds, off
     end
 end
 
+
 @inline function setindex!(s::MutableShiftedArray{<:Any, <:Any, N}, el, x::Vararg{Int, N}) where {N}
     @boundscheck checkbounds(s, x...)
     v, i = parent(s), offset(shifts(s), x)
@@ -116,6 +122,47 @@ end
     end
     return s
 end
+
+# @inline function setindex!(s::MutableShiftedArray{<:Any, <:Any, N, <:MutableShiftedArray}, el, x::Vararg{Int, N}) where {N}
+#     @boundscheck checkbounds(s, x...)
+#     v, i = parent(s), offset(shifts(s), x)
+#     if checkbounds(Bool, v, i...)
+#         setindex!(v, el, i...)
+#     end
+#     return s
+# end
+
+# @inline function setindex!(s::MutableShiftedArray{<:Any, <:Any, N}, el, x::Vararg{Union{Int, AbstractRange}, N}) where {N}
+#     @show "hiele"
+#     v = @view s[x...]
+#     v .= el
+#     return s
+# end
+
+@inline function getindex(s::MutableShiftedArray{<:Any, <:Any, N}, x::Vararg{Union{Int, AbstractRange}, N}) where {N}
+    v = @view s[x...]
+    res = similar(s.parent, eltype(s), size(v))
+    res .= v
+end
+
+function copy(s::MutableShiftedArray)
+    res = similar(s.parent, eltype(s), size(s))
+    res .= s
+end
+
+# function Base.copyto!(dst::AbstractArray, src::MutableShiftedArray)
+#     dst[:] .= @view src[:]
+# end
+
+# function Base.copyto!(dst::AbstractArray, Rdest::CartesianIndices, src::MutableShiftedArray, Rsrc::CartesianIndices)
+#     dst[Rdest...] .= @view src[Rsrc...]
+# end
+
+function collect(x::T)  where {T<:MutableShiftedArray{<:Any,<:Any,<:Any,<:MutableShiftedArray}}
+    x = MutableShiftedArray(collect(parent(x)), shifts(x), size(x); default=default(x))
+    return collect(x) # stay on the GPU
+end
+
 
 # function get_src_dst_ranges(src_shifts, src_size, dst_shifts, dst_size)
 #     src_ranges = ntuple((d) -> max(1, -src_shifts[d]):min(dst_size[d], src_size[d] - src_shifts[d]), length(src_size))
