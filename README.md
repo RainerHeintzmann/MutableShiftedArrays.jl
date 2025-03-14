@@ -1,3 +1,9 @@
+
+| **Documentation**                       | **Build Status**                          | **Code Coverage**               |
+|:---------------------------------------:|:-----------------------------------------:|:-------------------------------:|
+| [![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url] | [![][CI-img]][CI-url] | [![][codecov-img]][codecov-url] |
+
+
 # MutableShiftedArrays.jl
 A lightweight toolbox representing a ShiftedArray which is mutable. The code was based on `ShiftedArrays.jl`.
 Via the extension mechanism, `CUDA.jl` support is provided both for mutating and non-mutating operations.
@@ -25,3 +31,19 @@ The other toolbox also supports `CircShiftedArray` and `fftshift`.
   - Contributed to `ShiftedArrays.jl` upon which `MutableShiftedArrays.jl` is based on.
 - **Rainer Heintzmann** - [RainerHeintzmann](https://github.com/RainerHeintzmann)
 
+
+## Development
+Feel free to file an issue regarding problems, suggestions or improvement ideas for this package!
+
+
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-pink.svg
+[docs-dev-url]: https://rainerheintzmann.github.io/MutableShiftedArrays.jl/dev/
+
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-darkgreen.svg
+[docs-stable-url]: https://rainerheintzmann.github.io/MutableShiftedArrays.jl/stable/
+
+[CI-img]: https://github.com/rainerheintzmann/MutableShiftedArrays.jl/actions/workflows/ci.yml/badge.svg
+[CI-url]: https://github.com/rainerheintzmann/MutableShiftedArrays.jl/actions/workflows/ci.yml
+
+[codecov-img]: https://codecov.io/gh/rainerheintzmann/MutableShiftedArrays.jl/branch/main/graph/badge.svg?token=6XWI1M1MPB
+[codecov-url]: https://codecov.io/gh/rainerheintzmann/MutableShiftedArrays.jl
