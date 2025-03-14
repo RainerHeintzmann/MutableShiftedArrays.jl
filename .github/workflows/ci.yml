@@ -47,7 +47,12 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: "1"
-      - uses: julia-actions/julia-docdeploy@releases/v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
+      - name: Install dependencies
+        run: julia -e 'using Pkg; Pkg.instantiate()'
+      - name: Build documentation
+        run: julia --project=docs/ docs/make.jl
+      - name: Deploy documentation
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build
