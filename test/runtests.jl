@@ -71,11 +71,11 @@ end
     @test isequal(collect(sv1), opt_convert([nothing   nothing   nothing   nothing
                                  nothing   nothing   nothing   nothing
                                  nothing   nothing   nothing   nothing
-                                 nothing  1         5         9      ]))
+                                 nothing  1         5         9      ], use_cuda))
     @test isequal(collect(sv2), opt_convert([0  0         0         0
                                  0   nothing   nothing   nothing
                                  0   nothing   nothing   nothing
-                                 0  1         5         9      ]))
+                                 0  1         5         9      ], use_cuda))
 end
 
 @testset "mutations" begin
@@ -173,6 +173,8 @@ end
 
 end
 
-run_all_tests(false)
-# run_all_tests(true)
 
+run_all_tests(false)
+@testset "all in CUDA" begin
+run_all_tests(true)
+end
