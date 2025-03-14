@@ -178,4 +178,8 @@ if CUDA.functional()
     @testset "all in CUDA" begin
     run_all_tests(true)
     end
+else
+    @testset "no CUDA available!" begin
+        @test true == true
+    end
 end
