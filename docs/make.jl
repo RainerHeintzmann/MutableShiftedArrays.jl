@@ -16,8 +16,7 @@ makedocs(
     # strict = true,
 )
 
-# Deploy built documentation from Travis.
-# =======================================
+deploydocs(repo = "github.com/RainerHeintzmann/MutableShiftedArrays.jl.git", devbranch = "main")
 
 # deploydocs(
 #     # options
