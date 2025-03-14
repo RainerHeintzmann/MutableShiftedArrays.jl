@@ -45,5 +45,5 @@ Feel free to file an issue regarding problems, suggestions or improvement ideas 
 [CI-img]: https://github.com/rainerheintzmann/MutableShiftedArrays.jl/actions/workflows/ci.yml/badge.svg
 [CI-url]: https://github.com/rainerheintzmann/MutableShiftedArrays.jl/actions/workflows/ci.yml
 
-[codecov-img]: https://codecov.io/gh/rainerheintzmann/MutableShiftedArrays.jl/branch/main/graph/badge.svg?token=6XWI1M1MPB
+[codecov-img]: https://codecov.io/gh/rainerheintzmann/MutableShiftedArrays.jl/branch/main/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/rainerheintzmann/MutableShiftedArrays.jl
