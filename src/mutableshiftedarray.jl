@@ -1,6 +1,6 @@
 
 """
-    MutableShiftedArray(parent::AbstractArray, shifts = (), viewsize=size(v); default= MutableShiftedArrays.default(v))
+    MutableShiftedArray(parent::AbstractArray, shifts = (), viewsize=size(v); default = zero(eltype(parent)))
 
 Custom `AbstractArray` object to store an `AbstractArray` `parent` shifted by `shifts` steps
 (where `shifts` is a `Tuple` with one `shift` value per dimension of `parent`).
@@ -30,22 +30,22 @@ The recommended constructor is `MutableShiftedArray(parent, shifts; default = mi
 julia> v = [1, 3, 5, 4];
 
 julia> s = MutableShiftedArray(v, (1,))
-4-element MutableShiftedVector{Int64, Missing, Vector{Int64}}:
-  missing
+4-element MutableShiftedVector{Int64, Int64, Vector{Int64}}:
+ 0
  1
  3
  5
 
 julia> copy(s)
-4-element Vector{Union{Missing, Int64}}:
-  missing
+4-element Vector{Int64}:
+ 0
  1
  3
  5
 
 julia> v = reshape(1:16, 4, 4);
 
-julia> s = MutableShiftedArray(v, (0, 2))
+julia> s = MutableShiftedArray(v, (0, 2), default=missing)
 4×4 MutableShiftedArray{Int64, Missing, 2, Base.ReshapedArray{Int64, 2, UnitRange{Int64}, Tuple{}}}:
  missing  missing  1  5
  missing  missing  2  6
