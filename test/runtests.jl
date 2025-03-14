@@ -173,8 +173,9 @@ end
 
 end
 
-
 run_all_tests(false)
-@testset "all in CUDA" begin
-run_all_tests(true)
+if CUDA.functional()
+    @testset "all in CUDA" begin
+    run_all_tests(true)
+    end
 end
