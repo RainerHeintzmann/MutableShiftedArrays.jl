@@ -18,11 +18,11 @@ function run_all_tests(use_cuda)
 @testset "MutableShiftedVector" begin
     v = [1, 3, 5, 4]
     v = opt_convert(v, use_cuda);
-    @test all(v .== MutableShiftedVector(v, default=0))
+    @test v == MutableShiftedVector(v, default=0)
     sv = MutableShiftedVector(v, -1, default=0)
     @test isequal(sv, MutableShiftedVector(v, (-1,), default=0))
     @test length(sv) == 4
-    @test all(sv[1:3] .== opt_convert([3, 5, 4], use_cuda))
+    @test sv[1:3] == opt_convert([3, 5, 4], use_cuda)
     @test sv[4] == 0
     diff = v .- sv
     @test isequal(Array(diff), [-2, -2, 1, 4])
@@ -44,7 +44,7 @@ end
 @testset "MutableShiftedArray" begin
     v = collect(reshape(1:16, 4, 4))  # index assignment to reshaped ranges is not supported
     v = opt_convert(v, use_cuda);
-    @test all(v .== MutableShiftedArray(v))
+    @test v == MutableShiftedArray(v)
     sv = MutableShiftedArray(v, (-2, 0))
     @test length(sv) == 16
     @test sv[1:1, 3] == opt_convert([11], use_cuda)
@@ -59,7 +59,7 @@ end
                                11 15  -100 -100;
                                12 16  -100 -100], use_cuda))
     sneg = MutableShiftedArray(v, (0, -2), default = -100)
-    @test all(collect(sneg) .== coalesce.(collect(s), default(sneg)))
+    @test collect(sneg) == coalesce.(collect(s), default(sneg))
     @test checkbounds(Bool, sv, 2, 2)
     @test !checkbounds(Bool, sv, 123, 123)
     svnest = MutableShiftedArray(MutableShiftedArray(v, (1, 1)), 2)
@@ -157,7 +157,7 @@ end
     diff2 = v .- MutableShiftedArrays.lag(v, 2, default=missing)
     @test isequal(diff2, opt_convert([missing, missing, 7, 9], use_cuda))
 
-    @test all(MutableShiftedArrays.lag(v, 2, default = -100) .== coalesce.(MutableShiftedArrays.lag(v, 2, default=missing), -100))
+    @test MutableShiftedArrays.lag(v, 2, default = -100) == coalesce.(MutableShiftedArrays.lag(v, 2, default=missing), -100)
 
     diff = v .- MutableShiftedArrays.lead(v, default=missing)
     @test isequal(diff, opt_convert([-2, -5, -4, missing], use_cuda))
@@ -165,7 +165,7 @@ end
     diff2 = v .- MutableShiftedArrays.lead(v, 2, default=missing)
     @test isequal(diff2, opt_convert([-7, -9, missing, missing], use_cuda))
 
-    @test all(MutableShiftedArrays.lead(v, 2, default = -100) .== coalesce.(MutableShiftedArrays.lead(v, 2, default=missing), -100))
+    @test MutableShiftedArrays.lead(v, 2, default = -100) == coalesce.(MutableShiftedArrays.lead(v, 2, default=missing), -100)
 
     @test MutableShiftedArrays.lag(MutableShiftedArrays.lag(v, 1), 2) === MutableShiftedArrays.lag(v, 3)
     @test MutableShiftedArrays.lead(MutableShiftedArrays.lead(v, 1), 2) === MutableShiftedArrays.lead(v, 3)
