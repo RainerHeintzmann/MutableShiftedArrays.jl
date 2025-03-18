@@ -50,15 +50,7 @@ function Base.Array(x::T)  where {CT, N, CD, T<:MutableShiftedArray{<:Any,<:Any,
     return Array(copy(x)) # stay on the GPU        
 end
 
-function Base.:(==)(x::T, y)  where {CT, N, CD, T<:MutableShiftedArray{<:Any,<:Any,<:Any,<:CuArray{CT,N,CD}}}    
-    return all(x .== y)
-end
-
 function Base.:(==)(x::T, y::AbstractArray)  where {CT, N, CD, T<:MutableShiftedArray{<:Any,<:Any,<:Any,<:CuArray{CT,N,CD}}}    
-    return all(x .== y)
-end
-
-function Base.:(==)(y, x::T)  where {CT, N, CD, T<:MutableShiftedArray{<:Any,<:Any,<:Any,<:CuArray{CT,N,CD}}}    
     return all(x .== y)
 end
 
