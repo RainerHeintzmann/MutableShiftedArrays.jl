@@ -3,18 +3,15 @@
 |:---------------------------------------:|:-----------------------------------------:|:-------------------------------:|
 | [![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url] | [![][CI-img]][CI-url] | [![][codecov-img]][codecov-url] |
 
-
 # MutableShiftedArrays.jl
-A lightweight toolbox representing a ShiftedArray which is mutable. The code was based on `ShiftedArrays.jl`.
-Via the extension mechanism, `CUDA.jl` support is provided both for mutating and non-mutating operations.
+A lightweight toolbox representing a ShiftedArray which is mutable. The code was based on (`ShiftedArrays.jl`)[https://github.com/JuliaArrays/ShiftedArrays.jl] by Pietro Vertechi et al..
+Via the extension mechanism, `CUDA.jl` support is provided both for mutating and non-mutating operations for the `MutableShiftedArray` type as well as `CircShiftedArray`.
 
 The type `MutableShiftedArray` also supports having a modifies size of the view. This is useful for region of interest views, which can even
 surpass the limit of the original array.
 Mutations to elements outside the boundary of the original array are silently ignored and the `default` value is returned upon subsequent read operations.
 
 This code and most of the documentation is based on https://github.com/JuliaArrays/ShiftedArrays.jl with contributers listed below.
-
-The other toolbox also supports `CircShiftedArray` and `fftshift`.
 
 ## Contributors
 - **Pietro Vertechi** - [piever](https://github.com/piever)
