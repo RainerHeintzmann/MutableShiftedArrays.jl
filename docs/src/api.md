@@ -5,6 +5,8 @@
 ```@docs
 MutableShiftedArray
 MutableShiftedVector
+CircShiftedArray
+CircShiftedVector
 ```
 
 ## Shifting operations
@@ -12,6 +14,9 @@ MutableShiftedVector
 ```@docs
 MutableShiftedArrays.lag
 MutableShiftedArrays.lead
+MutableShiftedArrays.fftshift
+MutableShiftedArrays.ifftshift
+MutableShiftedArrays.circshift
 ```
 
 ## Accessor functions
@@ -19,6 +24,7 @@ MutableShiftedArrays.lead
 ```@docs
 shifts
 default
+MutableShiftedArrays.ft_center_diff
 ```
 
 ## Internals

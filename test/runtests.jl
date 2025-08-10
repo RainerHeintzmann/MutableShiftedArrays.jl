@@ -1,5 +1,5 @@
 using MutableShiftedArrays, Test
-# using AbstractFFTs 
+using AbstractFFTs 
 # use_cuda = true;  # set this to true to test ShiftedArrays for the CuArray datatype
 # if (use_cuda)
 using CUDA
@@ -170,6 +170,91 @@ end
     @test MutableShiftedArrays.lag(MutableShiftedArrays.lag(v, 1), 2) === MutableShiftedArrays.lag(v, 3)
     @test MutableShiftedArrays.lead(MutableShiftedArrays.lead(v, 1), 2) === MutableShiftedArrays.lead(v, 3)
 end
+
+    @testset "CircShiftedVector" begin
+        v = [1, 3, 5, 4]
+        v = opt_convert(v, use_cuda);
+        @test all(v .== CircShiftedVector(v))
+        sv = CircShiftedVector(v, -1)
+        @test isequal(sv, CircShiftedVector(v, (-1,)))
+        @test length(sv) == 4
+        @test all(sv .== opt_convert([3, 5, 4, 1], use_cuda))
+        diff = v .- sv
+        @test diff == opt_convert([-2, -2, 1, 3], use_cuda)
+        @test shifts(sv) == (3,)
+        sv2 = CircShiftedVector(v, 1)
+        diff = v .- sv2
+        @test copy(sv2) == opt_convert([4, 1, 3, 5], use_cuda)
+        @test all(CircShiftedVector(v, 1) .== circshift(v, 1))
+        CUDA.@allowscalar sv[2] = 0
+        @test collect(sv) == opt_convert([3, 0, 4, 1], use_cuda)
+        @test v == opt_convert([1, 3, 0, 4], use_cuda)
+        CUDA.@allowscalar sv[3] = 12 
+        @test collect(sv) == opt_convert([3, 0, 12, 1], use_cuda)
+        @test v == opt_convert([1, 3, 0, 12], use_cuda)
+        CUDA.@allowscalar @test sv === setindex!(sv, 12, 3) 
+        @test checkbounds(Bool, sv, 2)
+        @test !checkbounds(Bool, sv, 123)
+        sv = CircShiftedArray(v, 3)
+        svnest = CircShiftedArray(CircShiftedArray(v, 2), 1)
+        @test sv === svnest
+    end
+    
+    @testset "CircShiftedArray" begin
+        v = reshape(1:16, 4, 4)
+        v = opt_convert(v, use_cuda);
+        @test all(v .== CircShiftedArray(v))
+        sv = CircShiftedArray(v, (-2, 0))
+        @test length(sv) == 16
+        CUDA.@allowscalar @test sv[1, 3] == 11
+        @test shifts(sv) == (2, 0)
+        @test isequal(sv, CircShiftedArray(v, -2))
+        @test isequal(@inferred(CircShiftedArray(v, 2)), @inferred(CircShiftedArray(v, (2,))))
+        @test isequal(@inferred(CircShiftedArray(v)), @inferred(CircShiftedArray(v, (0, 0))))
+        s = CircShiftedArray(v, (0, 2))
+        @test isequal(collect(s), opt_convert([ 9 13 1 5;
+                                   10 14 2 6;
+                                   11 15 3 7;
+                                   12 16 4 8], use_cuda))
+        sv = CircShiftedArray(v, 3)
+        svnest = CircShiftedArray(CircShiftedArray(v, 2), 1)
+        @test sv === svnest
+    end
+    
+    @testset "circshift" begin
+        v = reshape(1:16, 4, 4)
+        v = opt_convert(v, use_cuda);
+        @test all(circshift(v, (1, -1)) .== MutableShiftedArrays.circshift(v, (1, -1)))
+        @test all(circshift(v, (1,)) .== MutableShiftedArrays.circshift(v, (1,)))
+        @test all(circshift(v, 3) .== MutableShiftedArrays.circshift(v, 3))
+        sv = MutableShiftedArrays.circshift(v, 3)
+        svnest = MutableShiftedArrays.circshift(MutableShiftedArrays.circshift(v, 2), 1)
+        @test sv === svnest
+    end
+    
+    @testset "fftshift and ifftshift" begin
+        function test_fftshift(x, dims=1:ndims(x))
+            x = opt_convert(x, use_cuda)
+            @test fftshift(x, dims) == MutableShiftedArrays.fftshift(x, dims)
+            @test ifftshift(x, dims) == MutableShiftedArrays.ifftshift(x, dims)
+        end
+    
+        test_fftshift(randn((10,)))
+        test_fftshift(randn((11,)))
+        test_fftshift(randn((10,)), (1,))
+        test_fftshift(randn(ComplexF32, (11,)), (1,))
+        test_fftshift(randn((10, 11)), (1,))
+        test_fftshift(randn((10, 11)), (2,))
+        test_fftshift(randn(ComplexF32,(10, 11)), (1, 2))
+        test_fftshift(randn((10, 11)))
+    
+        test_fftshift(randn((10, 11, 12, 13)), (2, 4))
+        test_fftshift(randn((10, 11, 12, 13)), (5))
+        test_fftshift(randn((10, 11, 12, 13)))
+    
+        @test (2, 2, 0) == MutableShiftedArrays.ft_center_diff((4, 5, 6), (1, 2)) # Fourier center is at (2, 3, 0)
+        @test (2, 2, 3) == MutableShiftedArrays.ft_center_diff((4, 5, 6), (1, 2, 3)) # Fourier center is at (2, 3, 4)
+    end
 
 end
 
