@@ -1,7 +1,7 @@
 name = "MutableShiftedArrays"
 uuid = "d3d30c82-a38e-471c-a45a-3d24d2f4d22d"
 authors = ["RainerHeintzmann <heintzmann@gmail.com>"]
-version = "0.4.0"
+version = "0.3.0"
 
 [weakdeps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
