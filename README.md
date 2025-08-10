@@ -4,7 +4,7 @@
 | [![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url] | [![][CI-img]][CI-url] | [![][codecov-img]][codecov-url] |
 
 # MutableShiftedArrays.jl
-A lightweight toolbox representing a ShiftedArray which is mutable. The code was based on (`ShiftedArrays.jl`)[https://github.com/JuliaArrays/ShiftedArrays.jl] by Pietro Vertechi et al..
+A lightweight toolbox representing a ShiftedArray which is mutable. The code was based on [`ShiftedArrays.jl`](https://github.com/JuliaArrays/ShiftedArrays.jl) by Pietro Vertechi et al..
 Via the extension mechanism, `CUDA.jl` support is provided both for mutating and non-mutating operations for the `MutableShiftedArray` type as well as `CircShiftedArray`.
 
 The type `MutableShiftedArray` also supports having a modifies size of the view. This is useful for region of interest views, which can even
@@ -28,10 +28,8 @@ This code and most of the documentation is based on https://github.com/JuliaArra
   - Contributed to `ShiftedArrays.jl` upon which `MutableShiftedArrays.jl` is based on.
 - **Rainer Heintzmann** - [RainerHeintzmann](https://github.com/RainerHeintzmann)
 
-
 ## Development
 Feel free to file an issue regarding problems, suggestions or improvement ideas for this package!
-
 
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-pink.svg
 [docs-dev-url]: https://rainerheintzmann.github.io/MutableShiftedArrays.jl/dev/
