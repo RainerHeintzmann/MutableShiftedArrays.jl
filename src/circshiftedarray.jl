@@ -60,6 +60,8 @@ CircShiftedVector(v::AbstractVector, n = ()) = CircShiftedArray(v, n)
 size(s::CircShiftedArray) = size(parent(s))
 axes(s::CircShiftedArray) = axes(parent(s))
 
+similar(s::CircShiftedArray, el::Type, v::NTuple{N, Int64}) where {N} = similar(s.parent, el, v)
+
 @inline function getindex(s::CircShiftedArray{T, N}, x::Vararg{Int, N}) where {T, N}
     @boundscheck checkbounds(s, x...)
     v, ind = parent(s), offset(shifts(s), x)

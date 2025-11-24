@@ -255,7 +255,11 @@ end
         @test (2, 2, 0) == MutableShiftedArrays.ft_center_diff((4, 5, 6), (1, 2)) # Fourier center is at (2, 3, 0)
         @test (2, 2, 3) == MutableShiftedArrays.ft_center_diff((4, 5, 6), (1, 2, 3)) # Fourier center is at (2, 3, 4)
     end
-
+    @testset "similar" begin
+        x = opt_convert(rand(10,11), use_cuda)
+        @test typeof(x) == typeof(similar(CircShiftedArray(x, (3,4))))
+        @test typeof(x) == typeof(similar(MutableShiftedArray(x, (3,4))))
+    end
 end
 
 run_all_tests(false)
