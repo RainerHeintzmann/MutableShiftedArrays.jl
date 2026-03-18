@@ -4,9 +4,9 @@ using Adapt
 using MutableShiftedArrays
 using Base # to allow displaying such arrays without causing the single indexing CUDA error
 const MutableShiftedArrayCu{N, CD} = MutableShiftedArray{<:Any,<:Any,<:Any,<:CuArray{<:Any,N,CD}}
-const MutableShiftedArrayOrWrapped = Union{MutableShiftedArray,
-                                    Base.ReshapedArray{<:Any, <:Any, <:MutableShiftedArray},
-                                    SubArray{<:Any, <:Any, <:MutableShiftedArray, <:Any, <:Any}}
+const MutableShiftedArrayOrWrapped = Union{MutableShiftedArrayCu,
+                                    Base.ReshapedArray{<:Any, <:Any, <:MutableShiftedArrayCu},
+                                    SubArray{<:Any, <:Any, <:MutableShiftedArrayCu, <:Any, <:Any}}
 
 # lets do this for the MutableShiftedArray type
 Adapt.adapt_structure(to, x::MutableShiftedArray) = MutableShiftedArray(adapt(to, parent(x)), shifts(x), size(x); default=MutableShiftedArrays.default(x));
@@ -43,6 +43,13 @@ end
 function Base.:(==)(x::T, y::T)  where {N, CD, T<:MutableShiftedArrayCu{N,CD}}    
     return all(x .== y)
 end
+
+_all_dims(arr) = ntuple(identity, ndims(arr))
+_to_scalar(x) = only(Array(x))
+
+# This is necessary, since sum(mutableshiftedarray) did throw an error
+Base.reduce(op, arr::MutableShiftedArrayOrWrapped) = _to_scalar(reduce(op, arr; dims=_all_dims(arr)))
+Base.mapreduce(f, op, arr::MutableShiftedArrayOrWrapped) = _to_scalar(mapreduce(f, op, arr; dims=_all_dims(arr)))
 
 ####### code for CircShiftedArray
 
@@ -86,6 +93,9 @@ function Base.copy(s::AllShiftedAndViews)
     res .= s
     return res
 end
+
+Base.reduce(op, arr::AllShiftedAndViewsCu) = _to_scalar(reduce(op, arr; dims=_all_dims(arr)))
+Base.mapreduce(f, op, arr::AllShiftedAndViewsCu) = _to_scalar(mapreduce(f, op, arr; dims=_all_dims(arr)))
 
 function Base.collect(x::AllShiftedAndViews) 
     return copy(x) # stay on the GPU        

@@ -269,12 +269,15 @@ if CUDA.functional()
 
         # some extra tests to check for indexing with integers
         v = rand(10,11)
-        sv = MutableShiftedArray(cu(rand(10,11)), (3,4))
+        sv = MutableShiftedArray(cu(v), (3,4))
         @test_throws ErrorException sv[5,6] 
         @test (CUDA.@allowscalar sv[5,6]) == Array(sv)[5,6]
         @test_throws ErrorException sv[47] 
         @test_throws BoundsError sv[1,2,3] 
         @test (CUDA.@allowscalar sv[47]) == Array(sv)[47]
+
+        sv = MutableShiftedArray(cu(v))
+        @test sum(v) ≈ sum(sv)
     end
 else
     @testset "no CUDA available!" begin
