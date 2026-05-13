@@ -77,6 +77,11 @@ end
     return s
 end
 
+function copy(s::CircShiftedArray)
+    res = similar(s.parent, eltype(s), size(s))
+    res .= s
+end
+
 parent(s::CircShiftedArray) = s.parent
 
 """

@@ -36,14 +36,6 @@ function Base.show(io::IO, mm::MIME"text/plain", cs::MCShiftedArrayCu)
     CUDA.@allowscalar invoke(Base.show, Tuple{IO, typeof(mm), AbstractArray}, io, mm, cs) 
 end
 
-
-# Unified copy/collect/Array for both MutableShiftedArray and CircShiftedArray on GPU
-function Base.copy(s::MCShiftedArrayCu)
-    res = similar(get_base_arr(s), eltype(s), size(s))
-    res .= s
-    return res
-end
-
 function Base.collect(x::MCShiftedArrayCu)
     return copy(x) # stay on the GPU
 end
