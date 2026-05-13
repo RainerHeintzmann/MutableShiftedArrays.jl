@@ -57,6 +57,11 @@ const CircShiftedVector{T, S<:AbstractArray} = CircShiftedArray{T, 1, S}
 
 CircShiftedVector(v::AbstractVector, n = ()) = CircShiftedArray(v, n)
 
+# This type is needed to dispatch the main copy diversions correctly
+const CircShiftedArrayOrSub = Union{CircShiftedArray,
+                                    Base.ReshapedArray{<:Any, <:Any, <:CircShiftedArray},
+                                    SubArray{<:Any, <:Any, <:CircShiftedArray, <:Any, <:Any}}
+
 size(s::CircShiftedArray) = size(parent(s))
 axes(s::CircShiftedArray) = axes(parent(s))
 
@@ -83,7 +88,7 @@ function copy(s::CircShiftedArray)
 end
 
 
-function Base.collect(x::CircShiftedArray) 
+function Base.collect(x::CircShiftedArrayOrSub) 
     return copy(x) # stay on the GPU, bypasses the copyto! function
 end
 
