@@ -82,6 +82,12 @@ function copy(s::CircShiftedArray)
     res .= s
 end
 
+
+function Base.collect(x::CircShiftedArray) 
+    return copy(x) # stay on the GPU, bypasses the copyto! function
+end
+
+
 parent(s::CircShiftedArray) = s.parent
 
 """
