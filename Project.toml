@@ -1,6 +1,6 @@
 name = "MutableShiftedArrays"
 uuid = "d3d30c82-a38e-471c-a45a-3d24d2f4d22d"
-version = "0.4"
+version = "0.4.1"
 authors = ["RainerHeintzmann <heintzmann@gmail.com>"]
 
 [weakdeps]

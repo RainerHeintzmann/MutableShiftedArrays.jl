@@ -64,6 +64,18 @@ function Base.:(==)(x::T, y::T)  where {N, CD, T<:MCShiftedArrayCu{N,CD}}
     return all(x .== y)
 end
 
+function Base.isapprox(x::T, y::AbstractArray; kwargs...) where {N, CD, T<:MCShiftedArrayCu{N,CD}}
+    return isapprox(collect(x), y; kwargs...)
+end
+
+function Base.isapprox(x::AbstractArray, y::T; kwargs...) where {N, CD, T<:MCShiftedArrayCu{N,CD}}
+    return isapprox(x, collect(y); kwargs...)
+end
+
+function Base.isapprox(x::T, y::T; kwargs...) where {N, CD, T<:MCShiftedArrayCu{N,CD}}
+    return isapprox(collect(x), collect(y); kwargs...)
+end
+
 _all_dims(arr) = ntuple(identity, ndims(arr))
 _to_scalar(x) = only(Array(x))
 

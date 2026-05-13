@@ -198,10 +198,11 @@ end
         sv = CircShiftedArray(v, 3)
         svnest = CircShiftedArray(CircShiftedArray(v, 2), 1)
         @test sv === svnest
+        @test sv ≈ svnest
     end
     
     @testset "CircShiftedArray" begin
-        v = reshape(1:16, 4, 4)
+        v = Float32.(reshape(1:16, 4, 4)) # convert to float since CUDA checks comparisons differently via norm
         v = opt_convert(v, use_cuda);
         @test all(v .== CircShiftedArray(v))
         sv = CircShiftedArray(v, (-2, 0))
@@ -219,6 +220,7 @@ end
         sv = CircShiftedArray(v, 3)
         svnest = CircShiftedArray(CircShiftedArray(v, 2), 1)
         @test sv === svnest
+        @test sv ≈ svnest # reveals a problem in CUDA with LinearAlgebra.norm(sv)
     end
     
     @testset "circshift" begin
